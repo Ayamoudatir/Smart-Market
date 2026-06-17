@@ -139,6 +139,17 @@ export async function addInventoryMovement(data: Omit<InventoryMovement, 'id'>) 
   return addDoc(collection(db, 'inventory_movements'), data)
 }
 
+export async function getInventoryMovementsByProduct(productId: string): Promise<InventoryMovement[]> {
+  const q = query(collection(db, 'inventory_movements'), where('productId', '==', productId))
+  const snap = await getDocs(q)
+  const docs = snap.docs.map(d => ({ id: d.id, ...d.data() } as InventoryMovement))
+  return docs.sort((a, b) => {
+    const ta = a.date instanceof Timestamp ? a.date.seconds : 0
+    const tb = b.date instanceof Timestamp ? b.date.seconds : 0
+    return tb - ta
+  })
+}
+
 // ─── Activity logs ────────────────────────────────────────────────────────────
 export async function addLog(data: Omit<ActivityLog, 'id'>) {
   return addDoc(collection(db, 'activity_logs'), data)

@@ -3,11 +3,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import { useNotifications } from '@/contexts/NotificationContext'
 import { logoutUser } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
-type NavItem = { label: string; href: string; icon: React.ReactNode }
+type NavItem = { label: string; href: string; icon: React.ReactNode; badge?: boolean }
 
 type Props = {
   role: string
@@ -18,6 +19,7 @@ type Props = {
 export default function Sidebar({ role, roleLabel, items }: Props) {
   const pathname = usePathname()
   const { user } = useAuth()
+  const { unreadOrders, unreadDeliveries, markOrdersRead, markDeliveriesRead } = useNotifications()
   const router = useRouter()
   const [open, setOpen] = useState(false)
 
@@ -49,13 +51,29 @@ export default function Sidebar({ role, roleLabel, items }: Props) {
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {items.map(item => {
           const active = pathname === item.href || pathname.startsWith(item.href + '/')
+          const badgeCount = item.badge
+            ? (role === 'livreur' ? unreadDeliveries : unreadOrders)
+            : 0
           return (
             <Link key={item.href} href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
+              onClick={() => item.badge && (role === 'livreur' ? markDeliveriesRead() : markOrdersRead())}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition relative ${
                 active ? 'bg-green-600 text-white' : 'text-green-100 hover:bg-green-800 hover:text-white'
               }`}>
-              <span className="w-5 h-5 shrink-0">{item.icon}</span>
-              {item.label}
+              <span className="w-5 h-5 shrink-0 relative">
+                {item.icon}
+                {badgeCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] font-bold flex items-center justify-center leading-none">
+                    {badgeCount > 9 ? '9+' : badgeCount}
+                  </span>
+                )}
+              </span>
+              <span className="flex-1">{item.label}</span>
+              {badgeCount > 0 && (
+                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                  {badgeCount > 9 ? '9+' : badgeCount}
+                </span>
+              )}
             </Link>
           )
         })}

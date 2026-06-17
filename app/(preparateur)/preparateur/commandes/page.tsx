@@ -5,6 +5,7 @@ import { subscribeOrders } from '@/lib/firestore'
 import type { Order, OrderStatus } from '@/types'
 import PageHeader from '@/components/layout/PageHeader'
 import StatusBadge from '@/components/layout/StatusBadge'
+import { useAuth } from '@/contexts/AuthContext'
 
 const TABS: { label: string; value: OrderStatus | 'all' }[] = [
   { label: 'Toutes', value: 'all' },
@@ -14,14 +15,16 @@ const TABS: { label: string; value: OrderStatus | 'all' }[] = [
 ]
 
 export default function CommandesPreparateur() {
+  const { loading: authLoading } = useAuth()
   const [orders, setOrders] = useState<Order[]>([])
   const [tab, setTab] = useState<OrderStatus | 'all'>('all')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (authLoading) return
     const unsub = subscribeOrders(o => { setOrders(o); setLoading(false) })
     return unsub
-  }, [])
+  }, [authLoading])
 
   const filtered = tab === 'all' ? orders : orders.filter(o => o.status === tab)
 

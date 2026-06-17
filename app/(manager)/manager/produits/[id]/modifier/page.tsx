@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { getProduct, updateProduct } from '@/lib/firestore'
 import type { Product } from '@/types'
 import PageHeader from '@/components/layout/PageHeader'
+import ImageUploader from '@/components/manager/ImageUploader'
 
 const CATEGORIES = ['Légumes', 'Fruits', 'Épicerie', 'Boulangerie', 'Fruits secs', 'Viandes', 'Poissons', 'Laitiers']
 const UNITS = ['kg', 'g', 'L', 'botte', 'u', 'boîte']
@@ -23,6 +24,7 @@ export default function ModifierProduit() {
     name: '', categoryName: CATEGORIES[0], price: '',
     unit: UNITS[0], quantity: '', alertThreshold: '5', description: '',
   })
+  const [images, setImages] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -39,6 +41,7 @@ export default function ModifierProduit() {
         alertThreshold: String(p.alertThreshold),
         description: p.description ?? '',
       })
+      setImages(p.images ?? [])
       setLoading(false)
     })
   }, [id])
@@ -63,6 +66,7 @@ export default function ModifierProduit() {
         unit: form.unit,
         quantity: qty,
         alertThreshold: threshold,
+        images,
         description: form.description,
         status: computeStatus(qty, threshold),
       })
@@ -89,6 +93,11 @@ export default function ModifierProduit() {
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 p-6 space-y-5">
         <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Photo du produit</label>
+            <ImageUploader value={images} onChange={setImages} productName={form.name} />
+          </div>
+
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Nom du produit</label>
             <input
