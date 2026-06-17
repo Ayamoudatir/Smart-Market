@@ -48,35 +48,35 @@ export default function AjouterProduit() {
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Nom du produit</label>
-            <input required value={form.name} onChange={set('name')} placeholder="Tomates fraîches" className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500" />
+            <input required value={form.name} onChange={set('name')} placeholder="Tomates fraîches" className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Catégorie</label>
-            <select value={form.categoryName} onChange={set('categoryName')} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
+            <select value={form.categoryName} onChange={set('categoryName')} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 bg-white">
               {CATEGORIES.map(c => <option key={c}>{c}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Unité</label>
-            <select value={form.unit} onChange={set('unit')} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
+            <select value={form.unit} onChange={set('unit')} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 bg-white">
               {UNITS.map(u => <option key={u}>{u}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Prix (dh)</label>
-            <input required type="number" min="0" step="0.5" value={form.price} onChange={set('price')} placeholder="8" className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500" />
+            <input required type="number" min="0" step="0.5" value={form.price} onChange={set('price')} placeholder="8" className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Quantité en stock</label>
-            <input required type="number" min="0" value={form.quantity} onChange={set('quantity')} placeholder="24" className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500" />
+            <input required type="number" min="0" value={form.quantity} onChange={set('quantity')} placeholder="24" className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500" />
           </div>
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Seuil d'alerte</label>
-            <input type="number" min="0" value={form.alertThreshold} onChange={set('alertThreshold')} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500" />
+            <input type="number" min="0" value={form.alertThreshold} onChange={set('alertThreshold')} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500" />
           </div>
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
-            <textarea value={form.description} onChange={set('description')} rows={3} placeholder="Brève description du produit…" className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 resize-none" />
+            <textarea value={form.description} onChange={set('description')} rows={3} placeholder="Brève description du produit…" className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 resize-none" />
           </div>
         </div>
         {error && <p className="text-sm text-red-500">{error}</p>}

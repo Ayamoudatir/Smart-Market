@@ -25,7 +25,7 @@ export default function AdminUsers() {
     <div>
       <PageHeader title="Utilisateurs" sub={`${users.length} comptes enregistrés`} />
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-        <table className="w-full">
+        <div className="overflow-x-auto"><table className="w-full min-w-[600px]">
           <thead>
             <tr className="border-b border-gray-100">
               {['Utilisateur', 'Email', 'Téléphone', 'Rôle', 'Actions'].map(h => (
@@ -58,7 +58,7 @@ export default function AdminUsers() {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       </div>
     </div>
   )

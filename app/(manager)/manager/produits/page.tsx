@@ -51,7 +51,7 @@ export default function ProduitsPage() {
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-        <table className="w-full">
+        <div className="overflow-x-auto"><table className="w-full min-w-[600px]">
           <thead>
             <tr className="border-b border-gray-100">
               <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-5 py-3">Produit</th>
@@ -95,7 +95,7 @@ export default function ProduitsPage() {
               <tr><td colSpan={6} className="px-5 py-10 text-center text-sm text-gray-400">Aucun produit trouvé</td></tr>
             )}
           </tbody>
-        </table>
+        </table></div>
       </div>
     </div>
   )

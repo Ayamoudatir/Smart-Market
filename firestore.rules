@@ -1,0 +1,75 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function role() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin()       { return isAuth() && role() == 'admin'; }
+    function isManager()     { return isAuth() && (role() == 'manager'     || role() == 'admin'); }
+    function isPreparateur() { return isAuth() && (role() == 'preparateur' || role() == 'admin'); }
+    function isLivreur()     { return isAuth() && (role() == 'livreur'     || role() == 'admin'); }
+    function isClient()      { return isAuth() && role() == 'client'; }
+
+    // ─── Users ────────────────────────────────────────────────────────────────
+    // Chaque user lit son propre profil. Admin lit tout. Admin écrit les rôles.
+    match /users/{userId} {
+      allow read:   if isAuth() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuth() && request.auth.uid == userId;
+      allow update: if isAdmin() || request.auth.uid == userId;
+      allow delete: if isAdmin();
+    }
+
+    // ─── Products ─────────────────────────────────────────────────────────────
+    // Tout le monde authentifié peut lire. Seuls manager/admin peuvent écrire.
+    match /products/{productId} {
+      allow read:   if isAuth();
+      allow create: if isManager();
+      allow update: if isManager();
+      allow delete: if isManager();
+    }
+
+    // ─── Orders ───────────────────────────────────────────────────────────────
+    // Client crée et lit ses propres commandes.
+    // Préparateur et livreur peuvent lire et mettre à jour le statut.
+    // Admin accès complet.
+    match /orders/{orderId} {
+      allow read:   if isAuth() && (
+                      isAdmin() ||
+                      isManager() ||
+                      isPreparateur() ||
+                      isLivreur() ||
+                      resource.data.clientId == request.auth.uid
+                    );
+      allow create: if isAuth();
+      allow update: if isAdmin() || isPreparateur() || isLivreur() ||
+                      resource.data.clientId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // ─── Inventory movements ──────────────────────────────────────────────────
+    // Manager/admin créent et lisent. Personne d'autre.
+    match /inventory_movements/{movId} {
+      allow read:   if isManager();
+      allow create: if isManager();
+      allow update: if isManager();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Activity logs ────────────────────────────────────────────────────────
+    // Tout le monde authentifié peut créer un log. Seul admin peut lire.
+    match /activity_logs/{logId} {
+      allow read:   if isAdmin();
+      allow create: if isAuth();
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

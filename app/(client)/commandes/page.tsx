@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { getClientOrders } from '@/lib/firestore'
+import { subscribeClientOrders } from '@/lib/firestore'
 import type { Order } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import PageHeader from '@/components/layout/PageHeader'
@@ -13,7 +13,8 @@ export default function MesCommandes() {
 
   useEffect(() => {
     if (!user) return
-    getClientOrders(user.uid).then(o => { setOrders(o); setLoading(false) })
+    const unsub = subscribeClientOrders(user.uid, o => { setOrders(o); setLoading(false) })
+    return unsub
   }, [user])
 
   if (loading) return <div className="flex items-center justify-center py-20 text-gray-400">Chargement…</div>

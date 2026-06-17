@@ -19,7 +19,7 @@ export default function AdminCommandes() {
     <div>
       <PageHeader title="Toutes les commandes" sub={`${orders.length} commandes`} />
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-        <table className="w-full">
+        <div className="overflow-x-auto"><table className="w-full min-w-[600px]">
           <thead>
             <tr className="border-b border-gray-100">
               {['Commande', 'Client', 'Adresse', 'Total', 'Statut'].map(h => (
@@ -39,7 +39,7 @@ export default function AdminCommandes() {
             ))}
             {orders.length === 0 && <tr><td colSpan={5} className="px-5 py-10 text-center text-sm text-gray-400">Aucune commande</td></tr>}
           </tbody>
-        </table>
+        </table></div>
       </div>
     </div>
   )

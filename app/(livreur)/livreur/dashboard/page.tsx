@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { getOrders, updateOrderStatus } from '@/lib/firestore'
+import { subscribeOrders, updateOrderStatus } from '@/lib/firestore'
 import type { Order } from '@/types'
 import PageHeader from '@/components/layout/PageHeader'
 import StatCard from '@/components/layout/StatCard'
@@ -14,10 +14,11 @@ export default function LivreurDashboard() {
   const [saving, setSaving] = useState<string | null>(null)
 
   useEffect(() => {
-    getOrders().then(o => {
+    const unsub = subscribeOrders(o => {
       setOrders(o.filter(x => x.status === 'prete' || x.status === 'en_livraison' || (x.status === 'livree' && x.deliveredBy === user?.uid)))
       setLoading(false)
     })
+    return unsub
   }, [user])
 
   async function takeDelivery(id: string) {

@@ -18,7 +18,7 @@ export default function StockHistory() {
     <div>
       <PageHeader title="Historique du stock" sub="Tous les mouvements d'entrée et sortie" />
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-        <table className="w-full">
+        <div className="overflow-x-auto"><table className="w-full min-w-[600px]">
           <thead>
             <tr className="border-b border-gray-100">
               {['Produit', 'Type', 'Quantité', 'Raison', 'Par', 'Date'].map(h => (
@@ -47,7 +47,7 @@ export default function StockHistory() {
               <tr><td colSpan={6} className="px-5 py-10 text-center text-sm text-gray-400">Aucun mouvement enregistré</td></tr>
             )}
           </tbody>
-        </table>
+        </table></div>
       </div>
     </div>
   )

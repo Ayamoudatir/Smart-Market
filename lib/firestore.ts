@@ -1,6 +1,6 @@
 import {
   collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
-  query, where, orderBy, limit, serverTimestamp, Timestamp, setDoc
+  query, where, orderBy, limit, serverTimestamp, Timestamp, setDoc, onSnapshot
 } from 'firebase/firestore'
 import { db } from './firebase'
 import type { Product, Order, OrderStatus, InventoryMovement, ActivityLog, User } from '@/types'
@@ -52,10 +52,16 @@ export async function deleteProduct(id: string) {
 // ─── Orders ───────────────────────────────────────────────────────────────────
 export async function getOrders(status?: OrderStatus): Promise<Order[]> {
   const q = status
-    ? query(collection(db, 'orders'), where('status', '==', status), orderBy('createdAt', 'desc'))
-    : query(collection(db, 'orders'), orderBy('createdAt', 'desc'))
+    ? query(collection(db, 'orders'), where('status', '==', status))
+    : query(collection(db, 'orders'))
   const snap = await getDocs(q)
-  return snap.docs.map(d => ({ id: d.id, ...d.data() } as Order))
+  return snap.docs
+    .map(d => ({ id: d.id, ...d.data() } as Order))
+    .sort((a, b) => {
+      const ta = (a.createdAt as unknown as { seconds: number })?.seconds ?? 0
+      const tb = (b.createdAt as unknown as { seconds: number })?.seconds ?? 0
+      return tb - ta
+    })
 }
 
 export async function getOrder(id: string): Promise<Order | null> {
@@ -65,9 +71,15 @@ export async function getOrder(id: string): Promise<Order | null> {
 }
 
 export async function getClientOrders(clientId: string): Promise<Order[]> {
-  const q = query(collection(db, 'orders'), where('clientId', '==', clientId), orderBy('createdAt', 'desc'))
+  const q = query(collection(db, 'orders'), where('clientId', '==', clientId))
   const snap = await getDocs(q)
-  return snap.docs.map(d => ({ id: d.id, ...d.data() } as Order))
+  return snap.docs
+    .map(d => ({ id: d.id, ...d.data() } as Order))
+    .sort((a, b) => {
+      const ta = (a.createdAt as unknown as { seconds: number })?.seconds ?? 0
+      const tb = (b.createdAt as unknown as { seconds: number })?.seconds ?? 0
+      return tb - ta
+    })
 }
 
 export async function updateOrderStatus(id: string, status: OrderStatus, extra?: Record<string, unknown>) {
@@ -79,6 +91,40 @@ export async function createOrder(data: Omit<Order, 'id' | 'createdAt' | 'update
     ...data,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
+  })
+}
+
+// ─── Real-time listeners ──────────────────────────────────────────────────────
+export function subscribeOrders(
+  callback: (orders: Order[]) => void,
+  status?: OrderStatus
+) {
+  const q = status
+    ? query(collection(db, 'orders'), where('status', '==', status))
+    : query(collection(db, 'orders'))
+  return onSnapshot(q, snap => {
+    const orders = snap.docs
+      .map(d => ({ id: d.id, ...d.data() } as Order))
+      .sort((a, b) => {
+        const ta = (a.createdAt as unknown as { seconds: number })?.seconds ?? 0
+        const tb = (b.createdAt as unknown as { seconds: number })?.seconds ?? 0
+        return tb - ta
+      })
+    callback(orders)
+  })
+}
+
+export function subscribeClientOrders(clientId: string, callback: (orders: Order[]) => void) {
+  const q = query(collection(db, 'orders'), where('clientId', '==', clientId))
+  return onSnapshot(q, snap => {
+    const orders = snap.docs
+      .map(d => ({ id: d.id, ...d.data() } as Order))
+      .sort((a, b) => {
+        const ta = (a.createdAt as unknown as { seconds: number })?.seconds ?? 0
+        const tb = (b.createdAt as unknown as { seconds: number })?.seconds ?? 0
+        return tb - ta
+      })
+    callback(orders)
   })
 }
 

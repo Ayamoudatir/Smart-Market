@@ -6,6 +6,15 @@ import { useRouter } from "next/navigation";
 import HeroPanel from "@/components/auth/HeroPanel";
 import InputField from "@/components/auth/InputField";
 import { loginUser, resetPassword } from "@/lib/auth";
+import { getUser } from "@/lib/firestore";
+
+const ROLE_HOME: Record<string, string> = {
+  admin: "/admin/dashboard",
+  manager: "/manager/dashboard",
+  preparateur: "/preparateur/dashboard",
+  livreur: "/livreur/dashboard",
+  client: "/catalogue",
+};
 
 const LOGIN_FEATURES = [
   "Fruits & légumes du jour",
@@ -26,8 +35,11 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      await loginUser(email, password);
-      router.push("/");
+      const user = await loginUser(email, password);
+      const profile = await getUser(user.uid);
+      const role = profile?.role ?? "client";
+      document.cookie = `userRole=${role}; path=/; max-age=86400`;
+      router.push(ROLE_HOME[role] ?? "/catalogue");
     } catch {
       setError("Email ou mot de passe incorrect.");
     } finally {

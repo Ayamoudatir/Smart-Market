@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getOrders } from '@/lib/firestore'
+import { subscribeOrders } from '@/lib/firestore'
 import type { Order, OrderStatus } from '@/types'
 import PageHeader from '@/components/layout/PageHeader'
 import StatusBadge from '@/components/layout/StatusBadge'
@@ -19,7 +19,8 @@ export default function CommandesPreparateur() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getOrders().then(o => { setOrders(o); setLoading(false) })
+    const unsub = subscribeOrders(o => { setOrders(o); setLoading(false) })
+    return unsub
   }, [])
 
   const filtered = tab === 'all' ? orders : orders.filter(o => o.status === tab)

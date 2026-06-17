@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getOrders } from '@/lib/firestore'
+import { subscribeOrders } from '@/lib/firestore'
 import type { Order } from '@/types'
 import PageHeader from '@/components/layout/PageHeader'
 import StatCard from '@/components/layout/StatCard'
@@ -12,7 +12,8 @@ export default function PreparateurDashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getOrders().then(o => { setOrders(o); setLoading(false) })
+    const unsub = subscribeOrders(o => { setOrders(o); setLoading(false) })
+    return unsub
   }, [])
 
   const waiting = orders.filter(o => o.status === 'en_attente')
