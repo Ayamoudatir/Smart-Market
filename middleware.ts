@@ -24,7 +24,8 @@ export function middleware(req: NextRequest) {
     if (role && ROLE_HOME[role]) {
       return NextResponse.redirect(new URL(ROLE_HOME[role], req.url))
     }
-    return NextResponse.redirect(new URL('/login', req.url))
+    // Pas connecté → page d'accueil publique
+    return NextResponse.next()
   }
 
   return NextResponse.next()
