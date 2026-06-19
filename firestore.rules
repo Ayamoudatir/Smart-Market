@@ -30,7 +30,7 @@ service cloud.firestore {
     // ─── Products ─────────────────────────────────────────────────────────────
     // Tout le monde authentifié peut lire. Seuls manager/admin peuvent écrire.
     match /products/{productId} {
-      allow read:   if isAuth();
+      allow read:   if true;
       allow create: if isManager();
       allow update: if isManager();
       allow delete: if isManager();

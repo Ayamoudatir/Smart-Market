@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import HeroPanel from "@/components/auth/HeroPanel";
 import InputField from "@/components/auth/InputField";
 import { loginUser, resetPassword } from "@/lib/auth";
@@ -13,7 +13,7 @@ const ROLE_HOME: Record<string, string> = {
   manager: "/manager/dashboard",
   preparateur: "/preparateur/dashboard",
   livreur: "/livreur/dashboard",
-  client: "/catalogue",
+  client: "/",
 };
 
 const LOGIN_FEATURES = [
@@ -23,7 +23,13 @@ const LOGIN_FEATURES = [
 ];
 
 export default function LoginPage() {
+  return <Suspense><LoginForm /></Suspense>
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -39,7 +45,7 @@ export default function LoginPage() {
       const profile = await getUser(user.uid);
       const role = profile?.role ?? "client";
       document.cookie = `userRole=${role}; path=/; max-age=86400`;
-      router.push(ROLE_HOME[role] ?? "/catalogue");
+      window.location.href = redirect ?? ROLE_HOME[role] ?? "/";
     } catch {
       setError("Email ou mot de passe incorrect.");
     } finally {

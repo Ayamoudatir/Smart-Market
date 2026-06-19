@@ -1,198 +1,305 @@
+'use client'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { getProducts } from '@/lib/firestore'
+import type { Product } from '@/types'
+import { useCart } from '@/contexts/CartContext'
+import { useAuth } from '@/contexts/AuthContext'
+import PublicNavbar from '@/components/layout/PublicNavbar'
+import PublicFooter from '@/components/layout/PublicFooter'
+
+const CATS = ['Tout', 'Légumes', 'Fruits', 'Épicerie', 'Boulangerie', 'Fruits secs', 'Viandes', 'Laitiers']
+
+const CAT_ICONS = [
+  { label: 'Légumes', bg: 'bg-green-100', svg: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 2C6.5 2 2 6.5 2 12"/><path d="M12 22V12"/><path d="M2 12h20"/></svg> },
+  { label: 'Fruits', bg: 'bg-orange-100', svg: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20"/><path d="M2 12h20"/></svg> },
+  { label: 'Viandes', bg: 'bg-red-100', svg: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg> },
+  { label: 'Boulangerie', bg: 'bg-yellow-100', svg: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg> },
+  { label: 'Laitiers', bg: 'bg-sky-100', svg: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2h8l2 6H6L8 2z"/><path d="M6 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg> },
+  { label: 'Épicerie', bg: 'bg-purple-100', svg: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9333ea" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> },
+  { label: 'Fruits secs', bg: 'bg-amber-100', svg: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8C8 10 5.9 16.17 3.82 19.34"/><path d="M21 3l-1 9s-5-5-11-3"/></svg> },
+  { label: 'Livraison rapide', bg: 'bg-teal-100', svg: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d9488" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> },
+]
 
 export default function Home() {
-  return (
-    <div className="relative min-h-screen overflow-hidden" style={{ background: 'linear-gradient(135deg, #0d3d1e 0%, #1a5c2a 40%, #2d7a3a 70%, #1e6b30 100%)' }}>
+  const [products, setProducts] = useState<Product[]>([])
+  const [cat, setCat] = useState('Tout')
+  const [search, setSearch] = useState('')
+  const [loadingProducts, setLoadingProducts] = useState(true)
+  const [addedId, setAddedId] = useState<string | null>(null)
+  const [catOpen, setCatOpen] = useState(false)
+  const { addItem, totalItems } = useCart()
+  const { user } = useAuth()
+  const displayName = user?.displayName || user?.email?.split('@')[0] || ''
+  const initials = displayName ? displayName.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2) : null
 
-      {/* Formes organiques floues background */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #4ade80, transparent)' }} />
-        <div className="absolute top-1/3 -left-20 w-72 h-72 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #86efac, transparent)' }} />
-        <div className="absolute -bottom-20 left-1/4 w-80 h-80 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #16a34a, transparent)' }} />
-        <div className="absolute top-0 right-1/3 w-64 h-64 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #f5c842, transparent)' }} />
-        <div className="absolute bottom-1/4 right-0 w-96 h-96 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #15803d, transparent)' }} />
-        {/* Grille subtile */}
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+  useEffect(() => {
+    getProducts().then(p => { setProducts(p.filter(x => x.status !== 'rupture')); setLoadingProducts(false) })
+  }, [])
+
+  function handleAdd(p: Product) {
+    addItem(p)
+    setAddedId(p.id)
+    setTimeout(() => setAddedId(null), 1000)
+  }
+
+  const filtered = products.filter(p =>
+    (cat === 'Tout' || p.categoryName === cat) &&
+    p.name.toLowerCase().includes(search.toLowerCase())
+  )
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+
+      {/* ── BARRE ANNONCE ── */}
+      <div className="bg-[#1a5c2a] text-white text-center text-xs font-semibold py-2 tracking-wide">
+        Livraison gratuite dès <span className="text-[#f5c842]">150 dh</span> — Produits frais livrés en <span className="text-[#f5c842]">30 minutes</span>
       </div>
 
-      {/* NAVBAR */}
-      <nav className="relative z-50 w-full px-6 md:px-16 pt-6">
-        <div className="flex items-center justify-between">
+      {/* ── HERO BANNER avec navbar transparente ── */}
+      <div className="relative w-full h-[700px] md:h-[820px] overflow-hidden">
+        <Image
+          src="/assets/kenzi_market_heropage.png"
+          alt="Kenzi Market"
+          fill
+          priority
+          className="object-cover object-[center_5%] hero-img"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/50 to-transparent" />
+
+        {/* Navbar transparente */}
+        <header className="absolute top-0 left-0 right-0 z-50 px-6 md:px-14 py-4 flex items-center gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-11 h-11 bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center p-2 shadow-lg group-hover:bg-white/25 transition-all duration-300">
-              <Image src="/assets/kenzi_logo.png" alt="Kenzi Market" width={200} height={200} className="w-full h-full object-contain" />
-            </div>
-            <div>
-              <span className="text-white font-extrabold text-xl tracking-tight leading-none block">Kenzi</span>
-              <span className="text-[#f5c842] font-bold text-sm tracking-widest uppercase leading-none">Market</span>
-            </div>
+          <Link href="/" className="shrink-0">
+            <Image src="/assets/kenzi_logo.png" alt="Kenzi Market" width={100} height={100} className="object-contain drop-shadow-lg" />
           </Link>
 
-          {/* Liens nav - glassmorphism pill */}
-          <div className="hidden lg:flex items-center gap-1 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl px-2 py-1.5">
-            {['Accueil', 'Catégories', 'Promotions', 'À propos', 'Contact'].map((item, i) => (
-              <Link key={item} href={i === 0 ? '/' : i === 1 ? '/catalogue' : '#'}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  i === 0 ? 'bg-white/20 text-white shadow-sm' : 'text-white/70 hover:text-white hover:bg-white/10'
-                }`}>
-                {item}
-              </Link>
-            ))}
-          </div>
-
-          {/* Boutons auth */}
-          <div className="flex items-center gap-3">
-            <Link href="/login"
-              className="hidden md:block text-white/80 hover:text-white text-sm font-medium px-5 py-2.5 rounded-xl border border-white/20 hover:bg-white/10 backdrop-blur-sm transition-all duration-200">
-              Connexion
-            </Link>
-            <Link href="/register"
-              className="text-gray-900 font-bold text-sm px-5 py-2.5 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 active:scale-100"
-              style={{ background: 'linear-gradient(135deg, #f5c842, #e6aa00)' }}>
-              Inscription
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      {/* HERO - deux colonnes */}
-      <main className="relative z-10 min-h-[calc(100vh-88px)] flex items-center">
-        <div className="w-full max-w-8xl mx-auto px-6 md:px-16 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center py-8">
-
-          {/* ─── COLONNE GAUCHE ─── */}
-          <div className="space-y-7 max-w-xl">
-
-            {/* Badge livraison rapide */}
-            <div className="inline-flex items-center gap-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-5 py-2 shadow-lg">
-              <span className="flex items-center justify-center w-5 h-5 bg-[#f5c842] rounded-full shrink-0">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1a5c2a" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
-              </span>
-              <span className="text-white/90 text-sm font-semibold tracking-wide">Livraison rapide de produits frais</span>
-              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse shrink-0" />
-            </div>
-
-            {/* Titre */}
-            <div>
-              <h1 className="text-5xl md:text-6xl font-black text-white leading-[1.05] tracking-tight">
-                Vos courses<br />
-                livrées{' '}
-                <span className="relative inline-block">
-                  <span className="relative z-10" style={{ WebkitTextFillColor: 'transparent', WebkitBackgroundClip: 'text', backgroundImage: 'linear-gradient(90deg, #f5c842, #ffd700)', backgroundClip: 'text' }}>
-                    directement
-                  </span>
-                </span><br />
-                <span className="text-white/90">chez vous.</span>
-              </h1>
-            </div>
-
-            {/* Description */}
-            <p className="text-white/65 text-lg leading-relaxed">
-              Des légumes frais, fruits de saison et produits du marché sélectionnés avec soin — livrés en <span className="text-white font-semibold">moins de 30 minutes</span> à votre porte.
-            </p>
-
-            {/* Barre de recherche */}
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-2 shadow-xl max-w-md">
-              <div className="flex items-center gap-3 flex-1 px-3">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          {/* Barre de recherche */}
+          <div className="flex-1 max-w-xl mx-2">
+            <div className="flex items-center bg-white/15 backdrop-blur-md rounded-xl overflow-hidden border border-white/25 focus-within:bg-white/25 transition">
+              <div className="flex items-center gap-2 flex-1 px-4 py-2.5">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="opacity-60 shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                 <input
-                  type="text"
-                  placeholder="Tomates, pommes, pain..."
-                  className="flex-1 bg-transparent text-white placeholder:text-white/40 text-sm outline-none"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Rechercher un produit…"
+                  className="flex-1 bg-transparent text-sm text-white placeholder:text-white/50 outline-none"
                 />
               </div>
-              <Link href="/catalogue"
-                className="text-gray-900 font-bold text-sm px-5 py-2.5 rounded-xl shadow transition-all hover:scale-105 whitespace-nowrap"
-                style={{ background: 'linear-gradient(135deg, #f5c842, #e6aa00)' }}>
+              <button
+                onClick={() => document.getElementById('catalogue')?.scrollIntoView({ behavior: 'smooth' })}
+                className="bg-[#f5c842] text-gray-900 px-5 py-2.5 text-sm font-bold hover:bg-yellow-400 transition">
                 Rechercher
-              </Link>
+              </button>
             </div>
+          </div>
 
-            {/* Boutons CTA */}
-            <div className="flex items-center gap-4 flex-wrap">
-              <Link href="/catalogue"
-                className="flex items-center gap-2 text-gray-900 font-bold text-sm px-7 py-3.5 rounded-2xl shadow-xl transition-all duration-200 hover:shadow-2xl hover:scale-105 active:scale-100"
-                style={{ background: 'linear-gradient(135deg, #f5c842, #e6aa00)' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                Commander maintenant
-              </Link>
-              <Link href="/catalogue"
-                className="flex items-center gap-2 text-white font-semibold text-sm px-7 py-3.5 rounded-2xl border border-white/25 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-200">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                Voir les catégories
-              </Link>
-            </div>
-
-            {/* Stats glassmorphism */}
-            <div className="flex items-center gap-4 flex-wrap pt-2">
-              {[
-                { value: '2 500+', label: 'Clients satisfaits' },
-                { value: '30 min', label: 'Livraison express' },
-                { value: '500+', label: 'Produits frais' },
-              ].map(s => (
-                <div key={s.value} className="bg-white/8 backdrop-blur-sm border border-white/12 rounded-2xl px-4 py-3 text-center min-w-[90px]">
-                  <p className="text-white font-extrabold text-lg leading-none">{s.value}</p>
-                  <p className="text-white/50 text-xs mt-1 font-medium">{s.label}</p>
+          {/* Icônes droite */}
+          <div className="flex items-center gap-2 ml-auto shrink-0">
+            <Link href={user ? '/compte' : '/login'} className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-white/10 transition">
+              {initials ? (
+                <div className="w-7 h-7 rounded-full bg-white/20 border border-white/40 flex items-center justify-center text-white text-[10px] font-black">
+                  {initials}
                 </div>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              )}
+              <span className="text-white/70 text-xs">{user ? (displayName.split(' ')[0] || 'Mon compte') : 'Mon compte'}</span>
+            </Link>
+            <Link href="/panier" className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-white/10 transition">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              <span className="text-white/70 text-xs">Mon panier</span>
+              {totalItems > 0 && (
+                <span className="absolute top-0.5 right-0.5 bg-[#f5c842] text-gray-900 text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">{totalItems}</span>
+              )}
+            </Link>
+          </div>
+        </header>
+
+        {/* Contenu hero */}
+        <div className="absolute inset-0 flex items-center">
+          <div className="px-8 md:px-16 max-w-xl space-y-5 pt-20">
+            <div className="hero-badge inline-flex items-center gap-2 bg-[#f5c842] text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full badge-pulse">
+              <span className="w-1.5 h-1.5 bg-gray-900 rounded-full animate-pulse" />
+              Nouveautés du jour
+            </div>
+            <h1 className="hero-title text-4xl md:text-5xl font-black text-white leading-tight drop-shadow-lg">
+              Épicerie <span className="text-[#f5c842]">fraîche</span><br />livrée chez vous
+            </h1>
+            <p className="hero-sub text-white/70 text-base">Produits sélectionnés du marché, livrés en <span className="text-white font-semibold">30 min</span>.</p>
+            <div className="hero-cta flex items-center gap-3 flex-wrap">
+              <button
+                onClick={() => document.getElementById('catalogue')?.scrollIntoView({ behavior: 'smooth' })}
+                className="bg-[#f5c842] text-gray-900 font-bold px-6 py-3 rounded-xl text-sm hover:bg-yellow-400 hover:scale-105 active:scale-95 transition-all shadow-lg">
+                Commander maintenant
+              </button>
+              <Link href="/register" className="text-white border border-white/40 font-semibold px-6 py-3 rounded-xl text-sm hover:bg-white/10 hover:scale-105 active:scale-95 transition-all">
+                S'inscrire
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── BARRE CATÉGORIES TOGGLE ── */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex items-center gap-3 h-14">
+
+            {/* Bouton toggle "Toutes les catégories" */}
+            <button
+              onClick={() => setCatOpen(o => !o)}
+              className="flex items-center gap-2 bg-[#1a5c2a] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-800 transition shrink-0">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              Toutes les catégories
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`transition-transform ${catOpen ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+
+            {/* Séparateur */}
+            <div className="w-px h-6 bg-gray-200 shrink-0" />
+
+            {/* Catégories scrollables */}
+            <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide flex-1">
+              {CATS.map(c => (
+                <button key={c} onClick={() => { setCat(c); document.getElementById('catalogue')?.scrollIntoView({ behavior: 'smooth' }) }}
+                  className={`px-4 py-1.5 rounded-xl text-sm font-medium whitespace-nowrap transition shrink-0 ${cat === c ? 'bg-[#1a5c2a] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+                  {c}
+                </button>
               ))}
             </div>
           </div>
-
-          {/* ─── COLONNE DROITE — image livreur ─── */}
-          <div className="relative flex justify-center lg:justify-end items-end h-full min-h-[400px] lg:min-h-[560px]">
-
-            {/* Halo vert derrière le livreur */}
-            <div className="absolute bottom-0 right-0 w-[480px] h-[480px] rounded-full opacity-30 blur-3xl"
-              style={{ background: 'radial-gradient(circle, #4ade80, transparent 70%)' }} />
-
-            {/* Cercle décoratif animé */}
-            <div className="absolute bottom-10 right-10 w-72 h-72 rounded-full border border-white/10 animate-spin" style={{ animationDuration: '30s' }} />
-            <div className="absolute bottom-16 right-16 w-56 h-56 rounded-full border border-white/8 animate-spin" style={{ animationDuration: '20s', animationDirection: 'reverse' }} />
-
-            {/* Badge glassmorphism flottants */}
-            <div className="absolute top-8 left-0 lg:left-4 bg-white/15 backdrop-blur-xl border border-white/25 rounded-2xl px-4 py-3 shadow-xl flex items-center gap-3 animate-bounce" style={{ animationDuration: '3s' }}>
-              <div className="w-9 h-9 bg-green-400/20 rounded-xl flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <div>
-                <p className="text-white font-bold text-sm">Qualité garantie</p>
-                <p className="text-white/50 text-xs">100% produits frais</p>
-              </div>
-            </div>
-
-            <div className="absolute top-1/2 -translate-y-1/2 right-0 bg-white/15 backdrop-blur-xl border border-white/25 rounded-2xl px-4 py-3 shadow-xl flex items-center gap-3">
-              <div className="w-9 h-9 bg-yellow-400/20 rounded-xl flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f5c842" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              </div>
-              <div>
-                <p className="text-white font-bold text-sm">Livraison 30 min</p>
-                <p className="text-white/50 text-xs">Partout en ville</p>
-              </div>
-            </div>
-
-            <div className="absolute bottom-24 left-0 lg:left-4 bg-white/15 backdrop-blur-xl border border-white/25 rounded-2xl px-4 py-3 shadow-xl flex items-center gap-3">
-              <div className="w-9 h-9 bg-blue-400/20 rounded-xl flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              </div>
-              <div>
-                <p className="text-white font-bold text-sm">7j/7 disponible</p>
-                <p className="text-white/50 text-xs">8h – 22h</p>
-              </div>
-            </div>
-
-            {/* Image principale */}
-            <Image
-              src="/assets/kenzi_market_heropage.png"
-              alt="Livreur Kenzi Market"
-              width={640}
-              height={560}
-              priority
-              className="relative z-10 object-contain object-bottom max-h-[520px] lg:max-h-[600px] w-auto drop-shadow-2xl"
-            />
-          </div>
         </div>
-      </main>
+
+        {/* Dropdown catégories */}
+        {catOpen && (
+          <div className="absolute left-0 right-0 bg-white border-t border-gray-100 shadow-xl z-50">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+              <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
+                {CAT_ICONS.map((c, i) => (
+                  <button key={i} onClick={() => { setCat(c.label === 'Livraison rapide' ? 'Tout' : c.label); setCatOpen(false); document.getElementById('catalogue')?.scrollIntoView({ behavior: 'smooth' }) }}
+                    className="flex flex-col items-center gap-2 group">
+                    <div className={`w-14 h-14 rounded-full ${c.bg} flex items-center justify-center group-hover:scale-110 transition shadow-sm`}>
+                      {c.svg}
+                    </div>
+                    <span className="text-xs font-medium text-gray-600 group-hover:text-[#1a5c2a] transition text-center">{c.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── SECTION CATALOGUE ── */}
+      <section id="catalogue" className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">
+              {cat === 'Tout' ? 'Tous les produits' : cat}
+            </h2>
+            <p className="text-sm text-gray-400 mt-0.5">{filtered.length} produits disponibles</p>
+          </div>
+          {cat !== 'Tout' && (
+            <button onClick={() => setCat('Tout')} className="text-sm text-[#1a5c2a] font-medium hover:underline">
+              Voir tout
+            </button>
+          )}
+        </div>
+
+        {/* Grille produits */}
+        {loadingProducts ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse">
+                <div className="w-full h-40 bg-gray-200" />
+                <div className="p-3 space-y-2">
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-4 bg-gray-200 rounded w-1/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {filtered.map(p => (
+              <div key={p.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all group">
+                <div className="relative overflow-hidden">
+                  {p.images?.[0] ? (
+                    <Image src={p.images[0]} alt={p.name} width={300} height={200} className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" />
+                  ) : (
+                    <div className="w-full h-40 bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#86efac" strokeWidth="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                    </div>
+                  )}
+                  <div className="absolute top-2 left-2">
+                    <span className="bg-[#1a5c2a] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{p.categoryName}</span>
+                  </div>
+                </div>
+                <div className="p-3">
+                  <p className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">{p.name}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <div>
+                      <span className="text-base font-bold text-gray-900">{p.price} dh</span>
+                      <span className="text-xs text-gray-400 ml-1">/ {p.unit}</span>
+                    </div>
+                    <button
+                      onClick={() => handleAdd(p)}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white transition-all ${addedId === p.id ? 'bg-green-500 scale-110' : 'bg-[#1a5c2a] hover:bg-green-700 hover:scale-105'}`}>
+                      {addedId === p.id
+                        ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      }
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {filtered.length === 0 && (
+              <div className="col-span-5 py-20 text-center">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" className="mx-auto mb-3"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <p className="text-sm text-gray-400">Aucun produit trouvé</p>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* ── NOS UNIVERS ── */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-5">Découvrez nos univers</h2>
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+          {[
+            { label: 'Légumes frais', sub: '45+ produits', gradient: 'from-green-600 to-green-400', slug: 'legumes', icon: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 2C6.5 2 2 6.5 2 12"/><path d="M12 22V12"/><path d="M2 12h20"/></svg> },
+            { label: 'Fruits de saison', sub: '30+ produits', gradient: 'from-orange-500 to-yellow-400', slug: 'fruits', icon: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20"/><path d="M2 12h20"/></svg> },
+            { label: 'Viandes & Volailles', sub: '20+ produits', gradient: 'from-red-600 to-rose-400', slug: 'viandes', icon: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg> },
+            { label: 'Boulangerie', sub: '15+ produits', gradient: 'from-yellow-600 to-amber-400', slug: 'boulangerie', icon: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg> },
+            { label: 'Produits laitiers', sub: '25+ produits', gradient: 'from-sky-500 to-blue-400', slug: 'laitiers', icon: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2h8l2 6H6L8 2z"/><path d="M6 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg> },
+            { label: 'Épicerie fine', sub: '60+ produits', gradient: 'from-purple-600 to-violet-400', slug: 'epicerie', icon: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> },
+            { label: 'Fruits secs', sub: '18+ produits', gradient: 'from-amber-700 to-yellow-500', slug: 'fruits-secs', icon: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8C8 10 5.9 16.17 3.82 19.34"/><path d="M21 3l-1 9s-5-5-11-3"/></svg> },
+          ].map((u, i) => (
+            <Link key={i} href={`/categorie/${u.slug}`}
+              className="shrink-0 w-44 h-52 rounded-2xl overflow-hidden relative group hover:scale-105 transition-transform">
+              <div className={`absolute inset-0 bg-gradient-to-b ${u.gradient}`} />
+              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition" />
+              <div className="relative h-full flex flex-col items-center justify-center gap-3 p-4">
+                <div className="opacity-90">{u.icon}</div>
+                <div className="text-center">
+                  <p className="text-white font-bold text-sm leading-tight">{u.label}</p>
+                  <p className="text-white/70 text-xs mt-1">{u.sub}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <PublicFooter />
+
     </div>
   )
 }

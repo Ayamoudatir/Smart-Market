@@ -16,7 +16,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   async function handleLogout() {
     document.cookie = 'userRole=; max-age=0; path=/'
     await logoutUser()
-    router.push('/login')
+    router.push('/')
   }
 
   const navLinks = [

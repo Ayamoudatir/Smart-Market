@@ -5,10 +5,9 @@ const ROLE_HOME: Record<string, string> = {
   manager: '/manager/dashboard',
   preparateur: '/preparateur/dashboard',
   livreur: '/livreur/dashboard',
-  client: '/catalogue',
 }
 
-const PROTECTED_PREFIXES = ['/admin', '/manager', '/preparateur', '/livreur', '/catalogue', '/panier', '/commandes']
+const PROTECTED_PREFIXES = ['/admin', '/manager', '/preparateur', '/livreur', '/commandes']
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
