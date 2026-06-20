@@ -1,31 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-  const { text, products } = await req.json()
+  const { text, imageBase64 } = await req.json()
 
-  if (!text || !products) {
-    return NextResponse.json({ error: 'Paramètres manquants' }, { status: 400 })
-  }
+  if (!text && !imageBase64) return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
 
-  const productList = products.map((p: { name: string; unit: string }) => `- ${p.name} (unité: ${p.unit})`).join('\n')
+  const messages = imageBase64
+    ? [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image_url',
+              image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
+            },
+            {
+              type: 'text',
+              text: `This is a grocery list or shopping note. Extract all items and quantities you can read.
+Return ONLY valid JSON array, no markdown, no explanation.
+Format: [{"name": "item name in french", "quantity": number}]
+- Default quantity is 1 if not specified
+- Translate everything to french
+- Include all readable items even if partially visible`,
+            },
+          ],
+        },
+      ]
+    : [
+        {
+          role: 'user',
+          content: `Extract grocery items and quantities from this text. Return ONLY valid JSON array, no markdown, no explanation.
+Text: "${text}"
+Format: [{"name": "item name", "quantity": number}]
+- quantity default is 1 if not specified
+- translate to french if needed`,
+        },
+      ]
 
-  const prompt = `Tu es un assistant pour une épicerie marocaine.
-L'utilisateur décrit sa liste de courses en français, arabe ou darija.
-
-Voici les produits disponibles dans le catalogue :
-${productList}
-
-Liste de courses de l'utilisateur : "${text}"
-
-Retourne UNIQUEMENT un JSON valide (sans markdown, sans explication) avec ce format exact :
-[{"name": "nom exact du produit du catalogue", "quantity": nombre}]
-
-Règles :
-- Utilise UNIQUEMENT des produits qui existent dans le catalogue ci-dessus
-- Si un produit demandé n'existe pas, ignore-le
-- La quantité doit être un nombre (ex: 2, 0.5, 1)
-- Si aucune quantité précisée, mets 1
-- Retourne un tableau vide [] si rien ne correspond`
+  const model = imageBase64 ? 'meta-llama/llama-4-scout-17b-16e-instruct' : 'llama-3.3-70b-versatile'
 
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
@@ -33,15 +45,11 @@ Règles :
       'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model: 'llama3-8b-8192',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.1,
-      max_tokens: 500,
-    }),
+    body: JSON.stringify({ model, messages, temperature: 0, max_tokens: 500 }),
   })
 
   const data = await response.json()
+  console.log('Groq response:', JSON.stringify(data).slice(0, 300))
   const content = data.choices?.[0]?.message?.content ?? '[]'
 
   try {
