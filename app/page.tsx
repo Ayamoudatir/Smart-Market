@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
 import PublicNavbar from '@/components/layout/PublicNavbar'
 import PublicFooter from '@/components/layout/PublicFooter'
+import AiFloatingAgent from '@/components/AiFloatingAgent'
 
 const CATS = ['Tout', 'Légumes', 'Fruits', 'Épicerie', 'Boulangerie', 'Fruits secs', 'Viandes', 'Laitiers']
 
@@ -299,6 +300,7 @@ export default function Home() {
       </div>
 
       <PublicFooter />
+      <AiFloatingAgent />
 
     </div>
   )
