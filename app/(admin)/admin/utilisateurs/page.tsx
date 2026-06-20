@@ -106,7 +106,7 @@ export default function AdminUsers() {
                 const isSelf = u.uid === currentUser?.uid
                 const isChanged = changed === u.uid
                 const isSaving = saving === u.uid
-                const cfg = ROLE_CONFIG[u.role]
+                const cfg = ROLE_CONFIG[u.role] ?? { label: u.role ?? 'Inconnu', color: 'bg-gray-100 text-gray-500' }
                 return (
                   <tr key={u.uid} className={`border-b border-gray-50 transition ${isChanged ? 'bg-green-50' : 'hover:bg-green-50/50'}`}>
                     <td className="px-5 py-4">
