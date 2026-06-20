@@ -1,6 +1,7 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { getProducts } from '@/lib/firestore'
 import type { Product } from '@/types'
@@ -8,7 +9,96 @@ import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
 import PublicNavbar from '@/components/layout/PublicNavbar'
 import PublicFooter from '@/components/layout/PublicFooter'
-import AiFloatingAgent from '@/components/AiFloatingAgent'
+
+function HeroAiAgent() {
+  const { user } = useAuth()
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const firstName = user?.displayName?.split(' ')[0] ?? user?.email?.split('@')[0] ?? ''
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
+      {/* Popup */}
+      {open && (
+        <div style={{
+          position: 'absolute', bottom: 'calc(100% + 12px)', left: 0,
+          background: '#fff', borderRadius: 20,
+          boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+          padding: '18px 18px 14px', width: 270,
+          border: '1px solid #e5f0e8',
+          animation: 'fadeUp 0.2s ease',
+          zIndex: 100,
+        }}>
+          <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`}</style>
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
+            <div style={{ width:36,height:36,borderRadius:'50%',background:'linear-gradient(135deg,#1a5c2a,#22c55e)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </div>
+            <div>
+              <p style={{ fontSize:12,fontWeight:700,color:'#1a5c2a',margin:0 }}>Assistant Kenzi IA</p>
+              <p style={{ fontSize:10,color:'#9ca3af',margin:0 }}>Répond à ta voix · En ligne</p>
+            </div>
+            <button onClick={() => setOpen(false)} style={{ marginLeft:'auto',color:'#9ca3af',background:'none',border:'none',cursor:'pointer',padding:2 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div style={{ background:'#f0fdf4',borderRadius:14,padding:'10px 13px',marginBottom:13 }}>
+            {user ? (
+              <p style={{ fontSize:13,color:'#374151',margin:0,lineHeight:1.6 }}>
+                Bonjour <strong>{firstName}</strong> 👋<br />
+                Dicte ta liste de courses ou prends une photo — je m'occupe du reste.
+              </p>
+            ) : (
+              <p style={{ fontSize:13,color:'#374151',margin:0,lineHeight:1.6 }}>
+                Connecte-toi et commande par <strong>voix</strong> ou <strong>photo</strong> en quelques secondes. 🎙️
+              </p>
+            )}
+          </div>
+          <button onClick={() => { setOpen(false); router.push(user ? '/panier' : '/login?redirect=/panier') }}
+            style={{ width:'100%',background:'#1a5c2a',color:'#fff',border:'none',borderRadius:12,padding:'10px 0',fontSize:13,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            {user ? 'Commander par voix ou photo' : 'Se connecter'}
+          </button>
+        </div>
+      )}
+
+      {/* Bouton bulle */}
+      <button onClick={() => setOpen(o => !o)} style={{
+        display:'flex', alignItems:'center', gap:10,
+        background:'rgba(255,255,255,0.12)', backdropFilter:'blur(12px)',
+        border:'1px solid rgba(255,255,255,0.25)',
+        borderRadius:50, padding:'10px 18px 10px 10px',
+        cursor:'pointer', color:'#fff',
+        boxShadow:'0 4px 20px rgba(0,0,0,0.2)',
+        transition:'transform 0.2s',
+      }}
+        onMouseEnter={e => (e.currentTarget.style.transform='scale(1.03)')}
+        onMouseLeave={e => (e.currentTarget.style.transform='scale(1)')}
+      >
+        {/* Avatar animé */}
+        <div style={{ position:'relative', width:38, height:38, borderRadius:'50%', background:'linear-gradient(135deg,#1a5c2a,#22c55e)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+          <span style={{ position:'absolute',inset:-5,borderRadius:'50%',border:'2px solid rgba(34,197,94,0.5)',animation:'ripple 2s ease-in-out infinite' }} />
+          <style>{`@keyframes ripple{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.2);opacity:0.4}}`}</style>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          <span style={{ position:'absolute',top:-3,right:-3,background:'#f5c842',color:'#111',fontSize:7,fontWeight:800,padding:'1px 4px',borderRadius:4 }}>IA</span>
+        </div>
+        <div style={{ textAlign:'left' }}>
+          <p style={{ fontSize:12,fontWeight:700,margin:0,lineHeight:1.2 }}>Commander par IA</p>
+          <p style={{ fontSize:10,opacity:0.7,margin:0 }}>Voix · Photo · Texte</p>
+        </div>
+      </button>
+    </div>
+  )
+}
 
 const CATS = ['Tout', 'Légumes', 'Fruits', 'Épicerie', 'Boulangerie', 'Fruits secs', 'Viandes', 'Laitiers']
 
@@ -140,6 +230,9 @@ export default function Home() {
                 S'inscrire
               </Link>
             </div>
+
+            {/* Bulle agent IA */}
+            <HeroAiAgent />
           </div>
         </div>
       </div>
@@ -300,7 +393,6 @@ export default function Home() {
       </div>
 
       <PublicFooter />
-      <AiFloatingAgent />
 
     </div>
   )

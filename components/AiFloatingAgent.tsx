@@ -1,12 +1,17 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function AiFloatingAgent() {
   const { user } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
+
+  // Afficher uniquement sur les pages publiques (pas dans les dashboards)
+  const hidden = pathname.startsWith('/admin') || pathname.startsWith('/preparateur') || pathname.startsWith('/livreur') || pathname.startsWith('/manager') || pathname.startsWith('/login') || pathname.startsWith('/register')
+  if (hidden) return null
 
   const firstName = user?.displayName?.split(' ')[0] ?? user?.email?.split('@')[0] ?? ''
 
