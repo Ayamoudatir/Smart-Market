@@ -47,7 +47,7 @@ export default function AdminDashboard() {
     return unsub
   }, [authLoading])
 
-  if (loading) return <div className="flex items-center justify-center py-20 text-gray-400">Chargement…</div>
+  if (loading) return <div className="flex items-center justify-center py-20 text-green-800/40">Chargement…</div>
 
   const todayOrders = orders.filter(o => isToday(o.createdAt))
   const caToday = todayOrders.reduce((sum, o) => sum + (o.total ?? 0), 0)
@@ -61,34 +61,81 @@ export default function AdminDashboard() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl border border-gray-200 p-5">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">CA aujourd'hui</p>
-          <p className="text-3xl font-bold text-green-600">{caToday} <span className="text-base font-medium text-gray-400">dh</span></p>
-          <p className="text-xs text-gray-400 mt-1">{todayOrders.length} commande{todayOrders.length > 1 ? 's' : ''}</p>
+        {/* CA aujourd'hui */}
+        <div className="relative overflow-hidden rounded-2xl bg-white/80 backdrop-blur-sm border border-white shadow-sm group">
+          <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-10 blur-2xl pointer-events-none group-hover:opacity-20 transition-opacity" style={{ background: '#1a5c2a' }} />
+          <div className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-green-500" />
+          <div className="px-5 pt-4 pb-5 pl-6">
+            <div className="flex items-start justify-between mb-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">CA aujourd'hui</p>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-green-100 text-green-700 shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+            </div>
+            <p className="text-4xl font-black tracking-tight leading-none text-[#1a5c2a]">{caToday}<span className="text-lg font-semibold text-green-800/30 ml-1">dh</span></p>
+            <p className="text-xs text-gray-400 mt-2 font-medium">{todayOrders.length} commande{todayOrders.length > 1 ? 's' : ''} aujourd'hui</p>
+          </div>
+          <div className="absolute bottom-0 left-6 right-0 h-px opacity-30" style={{ background: 'linear-gradient(to right, #22c55e, transparent)' }} />
         </div>
-        <div className="bg-white rounded-2xl border border-gray-200 p-5">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">CA total livré</p>
-          <p className="text-3xl font-bold text-gray-900">{caTotal} <span className="text-base font-medium text-gray-400">dh</span></p>
-          <p className="text-xs text-gray-400 mt-1">{orders.filter(o => o.status === 'livree').length} livrées</p>
+
+        {/* CA total livré */}
+        <div className="relative overflow-hidden rounded-2xl bg-white/80 backdrop-blur-sm border border-white shadow-sm group">
+          <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-10 blur-2xl pointer-events-none group-hover:opacity-20 transition-opacity" style={{ background: '#374151' }} />
+          <div className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-gray-400" />
+          <div className="px-5 pt-4 pb-5 pl-6">
+            <div className="flex items-start justify-between mb-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">CA total livré</p>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gray-100 text-gray-600 shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              </div>
+            </div>
+            <p className="text-4xl font-black tracking-tight leading-none text-gray-800">{caTotal}<span className="text-lg font-semibold text-gray-400 ml-1">dh</span></p>
+            <p className="text-xs text-gray-400 mt-2 font-medium">{orders.filter(o => o.status === 'livree').length} commandes livrées</p>
+          </div>
+          <div className="absolute bottom-0 left-6 right-0 h-px opacity-30" style={{ background: 'linear-gradient(to right, #6b7280, transparent)' }} />
         </div>
-        <div className="bg-white rounded-2xl border border-gray-200 p-5">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Utilisateurs</p>
-          <p className="text-3xl font-bold text-gray-900">{users.length}</p>
-          <p className="text-xs text-gray-400 mt-1">{users.filter(u => u.role === 'client').length} clients · {products.length} produits</p>
+
+        {/* Utilisateurs */}
+        <div className="relative overflow-hidden rounded-2xl bg-white/80 backdrop-blur-sm border border-white shadow-sm group">
+          <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-10 blur-2xl pointer-events-none group-hover:opacity-20 transition-opacity" style={{ background: '#1d4ed8' }} />
+          <div className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-blue-400" />
+          <div className="px-5 pt-4 pb-5 pl-6">
+            <div className="flex items-start justify-between mb-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Utilisateurs</p>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-blue-50 text-blue-600 shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+            </div>
+            <p className="text-4xl font-black tracking-tight leading-none text-blue-700">{users.length}</p>
+            <p className="text-xs text-gray-400 mt-2 font-medium">{users.filter(u => u.role === 'client').length} clients · {products.length} produits</p>
+          </div>
+          <div className="absolute bottom-0 left-6 right-0 h-px opacity-30" style={{ background: 'linear-gradient(to right, #3b82f6, transparent)' }} />
         </div>
-        <div className={`rounded-2xl border p-5 ${critiques.length > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}`}>
-          <p className={`text-xs font-semibold uppercase tracking-wide mb-1 ${critiques.length > 0 ? 'text-red-400' : 'text-gray-400'}`}>Stock critique</p>
-          <p className={`text-3xl font-bold ${critiques.length > 0 ? 'text-red-600' : 'text-gray-900'}`}>{critiques.length}</p>
-          <p className={`text-xs mt-1 ${critiques.length > 0 ? 'text-red-400' : 'text-gray-400'}`}>
-            {products.filter(p => p.status === 'rupture').length} rupture · {products.filter(p => p.status === 'bas').length} bas
-          </p>
+
+        {/* Stock critique */}
+        <div className={`relative overflow-hidden rounded-2xl backdrop-blur-sm border shadow-sm group ${critiques.length > 0 ? 'bg-red-50/80 border-red-100' : 'bg-white/80 border-white'}`}>
+          <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-10 blur-2xl pointer-events-none group-hover:opacity-20 transition-opacity" style={{ background: critiques.length > 0 ? '#dc2626' : '#1a5c2a' }} />
+          <div className={`absolute left-0 top-4 bottom-4 w-1 rounded-r-full ${critiques.length > 0 ? 'bg-red-500' : 'bg-green-400'}`} />
+          <div className="px-5 pt-4 pb-5 pl-6">
+            <div className="flex items-start justify-between mb-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Stock critique</p>
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${critiques.length > 0 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+            </div>
+            <p className={`text-4xl font-black tracking-tight leading-none ${critiques.length > 0 ? 'text-red-600' : 'text-green-600'}`}>{critiques.length}</p>
+            <p className="text-xs text-gray-400 mt-2 font-medium">
+              {products.filter(p => p.status === 'rupture').length} rupture · {products.filter(p => p.status === 'bas').length} bas
+            </p>
+          </div>
+          <div className="absolute bottom-0 left-6 right-0 h-px opacity-30" style={{ background: `linear-gradient(to right, ${critiques.length > 0 ? '#ef4444' : '#22c55e'}, transparent)` }} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Répartition par statut */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-5">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-green-100 p-5">
           <h2 className="font-semibold text-gray-900 mb-4">Répartition des commandes</h2>
           <div className="space-y-3">
             {STATUS_CONFIG.map(s => {
@@ -107,14 +154,14 @@ export default function AdminDashboard() {
               )
             })}
           </div>
-          <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between text-sm">
-            <span className="text-gray-400">Total</span>
+          <div className="mt-4 pt-4 border-t border-green-100 flex justify-between text-sm">
+            <span className="text-green-800/40">Total</span>
             <span className="font-bold text-gray-900">{orders.length} commandes</span>
           </div>
         </div>
 
         {/* Stock critique */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-5">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-green-100 p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-gray-900">Stock critique</h2>
             <Link href="/manager/produits" className="text-xs text-green-600 hover:text-green-700 font-medium">Gérer →</Link>
@@ -124,7 +171,7 @@ export default function AdminDashboard() {
               <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mb-2">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
-              <p className="text-sm text-gray-400">Tous les stocks sont OK</p>
+              <p className="text-sm text-green-800/40">Tous les stocks sont OK</p>
             </div>
           ) : (
             <div className="space-y-0 divide-y divide-gray-50">
@@ -132,7 +179,7 @@ export default function AdminDashboard() {
                 <div key={p.id} className="flex items-center justify-between py-2.5">
                   <div>
                     <p className="text-sm font-medium text-gray-800">{p.name}</p>
-                    <p className="text-xs text-gray-400">{p.categoryName}</p>
+                    <p className="text-xs text-green-800/40">{p.categoryName}</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-sm text-gray-600">{p.quantity} {p.unit}</span>
@@ -142,14 +189,14 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               ))}
-              {critiques.length > 6 && <p className="text-xs text-gray-400 text-center pt-2">+{critiques.length - 6} autres</p>}
+              {critiques.length > 6 && <p className="text-xs text-green-800/40 text-center pt-2">+{critiques.length - 6} autres</p>}
             </div>
           )}
         </div>
       </div>
 
       {/* Commandes temps réel */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-5">
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-green-100 p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <h2 className="font-semibold text-gray-900">Commandes récentes</h2>
@@ -163,26 +210,26 @@ export default function AdminDashboard() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[500px]">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-2 pr-4">Commande</th>
-                <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-2 pr-4">Client</th>
-                <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-2 pr-4">Heure</th>
-                <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-2 pr-4">Statut</th>
-                <th className="text-right text-xs font-semibold text-gray-400 uppercase tracking-wide pb-2">Total</th>
+              <tr className="border-b border-green-100">
+                <th className="text-left text-xs font-semibold text-green-800/40 uppercase tracking-wide pb-2 pr-4">Commande</th>
+                <th className="text-left text-xs font-semibold text-green-800/40 uppercase tracking-wide pb-2 pr-4">Client</th>
+                <th className="text-left text-xs font-semibold text-green-800/40 uppercase tracking-wide pb-2 pr-4">Heure</th>
+                <th className="text-left text-xs font-semibold text-green-800/40 uppercase tracking-wide pb-2 pr-4">Statut</th>
+                <th className="text-right text-xs font-semibold text-green-800/40 uppercase tracking-wide pb-2">Total</th>
               </tr>
             </thead>
             <tbody>
               {orders.slice(0, 10).map(o => (
-                <tr key={o.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition">
+                <tr key={o.id} className="border-b border-gray-50 last:border-0 hover:bg-green-50/50/50 transition">
                   <td className="py-3 pr-4 text-sm font-semibold text-gray-900">#{o.id.slice(-6).toUpperCase()}</td>
                   <td className="py-3 pr-4 text-sm text-gray-600">{o.clientName}</td>
-                  <td className="py-3 pr-4 text-sm text-gray-400">{formatTime(o.createdAt)}</td>
+                  <td className="py-3 pr-4 text-sm text-green-800/40">{formatTime(o.createdAt)}</td>
                   <td className="py-3 pr-4"><StatusBadge status={o.status} /></td>
                   <td className="py-3 text-right text-sm font-bold text-gray-900">{o.total} dh</td>
                 </tr>
               ))}
               {orders.length === 0 && (
-                <tr><td colSpan={5} className="py-10 text-center text-sm text-gray-400">Aucune commande</td></tr>
+                <tr><td colSpan={5} className="py-10 text-center text-sm text-green-800/40">Aucune commande</td></tr>
               )}
             </tbody>
           </table>

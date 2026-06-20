@@ -8,8 +8,14 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
     function role() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      return isAuth() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? userDoc().data.get('role', 'client')
+        : 'client';
     }
 
     function isAdmin()       { return isAuth() && role() == 'admin'; }
@@ -42,15 +48,19 @@ service cloud.firestore {
     // Admin accès complet.
     match /orders/{orderId} {
       allow read:   if isAuth() && (
+                      request.auth.uid == resource.data.clientId ||
                       isAdmin() ||
                       isManager() ||
                       isPreparateur() ||
-                      isLivreur() ||
-                      resource.data.clientId == request.auth.uid
+                      isLivreur()
                     );
-      allow create: if isAuth();
-      allow update: if isAdmin() || isPreparateur() || isLivreur() ||
-                      resource.data.clientId == request.auth.uid;
+      allow create: if isAuth() && request.auth.uid == request.resource.data.clientId;
+      allow update: if isAuth() && (
+                      request.auth.uid == resource.data.clientId ||
+                      isAdmin() ||
+                      isPreparateur() ||
+                      isLivreur()
+                    );
       allow delete: if isAdmin();
     }
 

@@ -8,8 +8,8 @@ export default function PageHeader({ title, sub, action }: Props) {
   return (
     <div className="flex items-start justify-between mb-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-        {sub && <p className="text-sm text-gray-500 mt-1">{sub}</p>}
+        <h1 className="text-2xl font-bold text-[#1a5c2a]">{title}</h1>
+        {sub && <p className="text-sm text-green-800/50 mt-1">{sub}</p>}
       </div>
       {action && <div>{action}</div>}
     </div>

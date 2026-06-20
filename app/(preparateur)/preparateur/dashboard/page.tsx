@@ -20,23 +20,26 @@ export default function PreparateurDashboard() {
   const inProgress = orders.filter(o => o.status === 'en_preparation')
   const done = orders.filter(o => o.status === 'prete')
 
-  if (loading) return <div className="flex items-center justify-center h-full text-gray-400">Chargement…</div>
+  if (loading) return <div className="flex items-center justify-center h-full text-green-800/40">Chargement…</div>
 
   return (
     <div>
       <PageHeader title="Tableau de bord" sub="Gestion des préparations" />
       <div className="grid grid-cols-3 gap-4 mb-8">
-        <StatCard label="En attente" value={waiting.length} color="yellow" />
-        <StatCard label="En cours" value={inProgress.length} color="blue" />
-        <StatCard label="Prêtes" value={done.length} color="green" />
+        <StatCard label="En attente" value={waiting.length} color="yellow"
+          icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>} />
+        <StatCard label="En cours" value={inProgress.length} color="blue"
+          icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>} />
+        <StatCard label="Prêtes" value={done.length} color="green"
+          icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>} />
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 p-5">
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-green-100 p-5">
         <h2 className="font-semibold text-gray-900 mb-4">Commandes à traiter</h2>
         <div className="space-y-3">
-          {[...waiting, ...inProgress].length === 0 && <p className="text-sm text-gray-400">Aucune commande à traiter</p>}
+          {[...waiting, ...inProgress].length === 0 && <p className="text-sm text-green-800/40">Aucune commande à traiter</p>}
           {[...waiting, ...inProgress].map(o => (
-            <Link key={o.id} href={`/preparateur/commandes/${o.id}`} className="flex items-center justify-between py-3 px-4 border border-gray-100 rounded-xl hover:border-green-200 hover:bg-green-50 transition">
+            <Link key={o.id} href={`/preparateur/commandes/${o.id}`} className="flex items-center justify-between py-3 px-4 border border-green-100 rounded-xl hover:border-green-200 hover:bg-green-50 transition">
               <div>
                 <p className="text-sm font-semibold text-gray-900">#{o.id.slice(-6).toUpperCase()}</p>
                 <p className="text-xs text-gray-500">{o.clientName} · {o.items.length} article{o.items.length > 1 ? 's' : ''}</p>

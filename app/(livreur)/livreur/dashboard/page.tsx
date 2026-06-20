@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { subscribeOrders, updateOrderStatus } from '@/lib/firestore'
 import type { Order } from '@/types'
 import PageHeader from '@/components/layout/PageHeader'
+import StatCard from '@/components/layout/StatCard'
 import StatusBadge from '@/components/layout/StatusBadge'
 import { useAuth } from '@/contexts/AuthContext'
 import { Timestamp } from 'firebase/firestore'
@@ -58,7 +59,7 @@ export default function LivreurDashboard() {
   const done = orders.filter(o => o.status === 'livree')
   const displayed = tab === 'active' ? active : done
 
-  if (loading) return <div className="flex items-center justify-center py-20 text-gray-400">Chargement…</div>
+  if (loading) return <div className="flex items-center justify-center py-20 text-green-800/40">Chargement…</div>
 
   return (
     <div className="max-w-xl">
@@ -66,25 +67,19 @@ export default function LivreurDashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="bg-white rounded-2xl border border-gray-200 p-4 text-center">
-          <p className="text-2xl font-bold text-orange-500">{orders.filter(o => o.status === 'prete').length}</p>
-          <p className="text-xs text-gray-400 mt-1">Prêtes</p>
-        </div>
-        <div className="bg-white rounded-2xl border border-gray-200 p-4 text-center">
-          <p className="text-2xl font-bold text-blue-500">{orders.filter(o => o.status === 'en_livraison').length}</p>
-          <p className="text-xs text-gray-400 mt-1">En cours</p>
-        </div>
-        <div className="bg-white rounded-2xl border border-gray-200 p-4 text-center">
-          <p className="text-2xl font-bold text-green-600">{done.length}</p>
-          <p className="text-xs text-gray-400 mt-1">Livrées</p>
-        </div>
+        <StatCard label="À récupérer" value={orders.filter(o => o.status === 'prete').length} color="yellow"
+          icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>} />
+        <StatCard label="En livraison" value={orders.filter(o => o.status === 'en_livraison').length} color="blue"
+          icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>} />
+        <StatCard label="Livrées" value={done.length} color="green"
+          icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>} />
       </div>
 
       {/* Tabs */}
       <div className="flex gap-2 mb-4">
         {TABS.map(t => (
           <button key={t.value} onClick={() => setTab(t.value)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition ${tab === t.value ? 'bg-green-600 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition ${tab === t.value ? 'bg-green-600 text-white' : 'bg-white border border-green-100 text-gray-600 hover:bg-green-50/50'}`}>
             {t.label}
             {t.value === 'active' && active.length > 0 && (
               <span className="ml-2 bg-orange-100 text-orange-600 text-xs font-bold px-1.5 py-0.5 rounded-full">{active.length}</span>
@@ -96,7 +91,7 @@ export default function LivreurDashboard() {
       {/* Liste */}
       <div className="space-y-3">
         {displayed.length === 0 && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-10 text-center text-sm text-gray-400">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-green-100 p-10 text-center text-sm text-green-800/40">
             {tab === 'active' ? 'Aucune livraison en cours' : 'Aucune livraison effectuée'}
           </div>
         )}
@@ -104,36 +99,36 @@ export default function LivreurDashboard() {
         {displayed.map(o => {
           const isOpen = expanded === o.id
           return (
-            <div key={o.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div key={o.id} className="bg-white/80 backdrop-blur-sm rounded-2xl border border-green-100 overflow-hidden">
               {/* Header carte */}
               <button
                 type="button"
                 onClick={() => setExpanded(isOpen ? null : o.id)}
-                className="w-full px-5 py-4 flex items-start justify-between text-left hover:bg-gray-50/50 transition"
+                className="w-full px-5 py-4 flex items-start justify-between text-left hover:bg-green-50/50/50 transition"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="font-bold text-gray-900">#{o.id.slice(-6).toUpperCase()}</span>
                     <StatusBadge status={o.status} />
-                    <span className="text-xs text-gray-400">{formatTime(o.createdAt)}</span>
+                    <span className="text-xs text-green-800/40">{formatTime(o.createdAt)}</span>
                   </div>
                   <p className="text-sm font-medium text-gray-700 truncate">{o.clientName}</p>
                   <div className="flex items-center gap-1 mt-0.5">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 shrink-0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    <p className="text-xs text-gray-400 truncate">{o.clientAddress}</p>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-800/40 shrink-0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <p className="text-xs text-green-800/40 truncate">{o.clientAddress}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0 ml-3">
                   <span className="text-lg font-bold text-gray-900">{o.total} dh</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-green-800/40 transition-transform ${isOpen ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9"/></svg>
                 </div>
               </button>
 
               {/* Détail (accordéon) */}
               {isOpen && (
-                <div className="border-t border-gray-100">
+                <div className="border-t border-green-100">
                   <div className="px-5 py-3 space-y-2">
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Articles</p>
+                    <p className="text-xs font-semibold text-green-800/40 uppercase tracking-wide mb-2">Articles</p>
                     {o.items.map((item, i) => (
                       <div key={i} className="flex items-center justify-between text-sm">
                         <span className="text-gray-700">{item.name} × {item.quantity} {item.unit}</span>
