@@ -237,6 +237,12 @@ export default function AiCartInput() {
         {preview && (
           <div className="mt-3 relative">
             <img src={preview} alt="preview" className="w-full max-h-40 object-cover rounded-xl border border-green-100" />
+            {!loading && (
+              <button onClick={() => { setPreview(null); setResults([]) }}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            )}
             {loading && (
               <div className="absolute inset-0 bg-white/70 backdrop-blur-sm rounded-xl flex items-center justify-center gap-2">
                 <div className="w-5 h-5 rounded-full border-2 border-[#1a5c2a] border-t-transparent animate-spin" />
