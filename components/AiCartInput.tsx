@@ -164,18 +164,21 @@ export default function AiCartInput() {
     <>
       {/* Modal caméra */}
       {cameraOpen && (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col">
-          <div className="flex items-center justify-between px-4 py-3 bg-black/80">
-            <p className="text-white font-semibold text-sm">Prendre une photo</p>
-            <button onClick={closeCamera} className="text-white/70 hover:text-white">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: '#000', display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'rgba(0,0,0,0.8)', flexShrink: 0 }}>
+            <p style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>Prendre une photo</p>
+            <button onClick={closeCamera} style={{ color: 'rgba(255,255,255,0.7)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
-          <video ref={videoRef} className="flex-1 object-cover w-full" autoPlay playsInline muted />
-          <div className="flex justify-center items-center py-6 bg-black/80">
+          {/* Vidéo */}
+          <video ref={videoRef} style={{ flex: 1, width: '100%', objectFit: 'cover', display: 'block' }} autoPlay playsInline muted />
+          {/* Bouton capture */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '24px 0', background: 'rgba(0,0,0,0.8)', flexShrink: 0 }}>
             <button onClick={capturePhoto}
-              className="w-16 h-16 rounded-full bg-white border-4 border-[#1a5c2a] flex items-center justify-center shadow-lg active:scale-95 transition">
-              <div className="w-12 h-12 rounded-full bg-[#1a5c2a]" />
+              style={{ width: 72, height: 72, borderRadius: '50%', background: '#fff', border: '5px solid #1a5c2a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
+              <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#1a5c2a' }} />
             </button>
           </div>
         </div>
