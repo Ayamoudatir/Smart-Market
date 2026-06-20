@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { createOrder } from '@/lib/firestore'
 import PublicNavbar from '@/components/layout/PublicNavbar'
 import PublicFooter from '@/components/layout/PublicFooter'
+import AiCartInput from '@/components/AiCartInput'
 
 export default function Panier() {
   const { items, removeItem, updateQty, total, clearCart } = useCart()
@@ -53,6 +54,8 @@ export default function Panier() {
             <p className="text-sm text-gray-400">{items.length} article{items.length > 1 ? 's' : ''}</p>
           </div>
         </div>
+
+        <AiCartInput />
 
         {items.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
