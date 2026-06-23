@@ -161,51 +161,60 @@ export default function Home() {
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/50 to-transparent" />
 
         {/* Navbar transparente */}
-        <header className="absolute top-0 left-0 right-0 z-50 px-6 md:px-14 py-4 flex items-center gap-4">
-          {/* Logo */}
-          <Link href="/" className="shrink-0">
-            <Image src="/assets/kenzi_logo.png" alt="Kenzi Market" width={100} height={100} className="object-contain drop-shadow-lg" />
-          </Link>
+        <header className="absolute top-0 left-0 right-0 z-50">
+          {/* Ligne 1 : Logo + Compte + Panier */}
+          <div className="flex items-center px-3 md:px-14 py-3 gap-2">
+            <Link href="/" className="shrink-0">
+              <Image src="/assets/kenzi_logo.png" alt="Kenzi Market" width={100} height={100} className="object-contain drop-shadow-lg w-12 h-12 md:w-[88px] md:h-[88px]" />
+            </Link>
 
-          {/* Barre de recherche */}
-          <div className="flex-1 max-w-xl mx-2">
-            <div className="flex items-center bg-white/15 backdrop-blur-md rounded-xl overflow-hidden border border-white/25 focus-within:bg-white/25 transition">
-              <div className="flex items-center gap-2 flex-1 px-4 py-2.5">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="opacity-60 shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="Rechercher un produit…"
-                  className="flex-1 bg-transparent text-sm text-white placeholder:text-white/50 outline-none"
-                />
+            {/* Barre de recherche desktop uniquement */}
+            <div className="hidden md:flex flex-1 max-w-xl mx-2">
+              <div className="flex items-center bg-white/15 backdrop-blur-md rounded-xl overflow-hidden border border-white/25 focus-within:bg-white/25 transition w-full">
+                <div className="flex items-center gap-2 flex-1 px-4 py-2.5">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="opacity-60 shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un produit…" className="flex-1 bg-transparent text-sm text-white placeholder:text-white/50 outline-none" />
+                </div>
+                <button onClick={() => document.getElementById('catalogue')?.scrollIntoView({ behavior: 'smooth' })} className="bg-[#f5c842] text-gray-900 px-5 py-2.5 text-sm font-bold hover:bg-yellow-400 transition shrink-0">
+                  Rechercher
+                </button>
               </div>
-              <button
-                onClick={() => document.getElementById('catalogue')?.scrollIntoView({ behavior: 'smooth' })}
-                className="bg-[#f5c842] text-gray-900 px-5 py-2.5 text-sm font-bold hover:bg-yellow-400 transition">
-                Rechercher
-              </button>
+            </div>
+
+            {/* Spacer mobile */}
+            <div className="flex-1 md:hidden" />
+
+            {/* Compte + Panier */}
+            <div className="flex items-center gap-0 shrink-0">
+              <Link href={user ? '/compte' : '/login'} className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl hover:bg-white/10 transition">
+                {initials ? (
+                  <div className="w-7 h-7 rounded-full bg-white/20 border border-white/40 flex items-center justify-center text-white text-[10px] font-black">{initials}</div>
+                ) : (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                )}
+                <span className="text-white/70 text-[10px]">{user ? (displayName.split(' ')[0] || 'Compte') : 'Compte'}</span>
+              </Link>
+              <Link href="/panier" className="relative flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl hover:bg-white/10 transition">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                <span className="text-white/70 text-[10px]">Panier</span>
+                {totalItems > 0 && (
+                  <span className="absolute top-1 right-1 bg-[#f5c842] text-gray-900 text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center leading-none">{totalItems}</span>
+                )}
+              </Link>
             </div>
           </div>
 
-          {/* Icônes droite */}
-          <div className="flex items-center gap-2 ml-auto shrink-0">
-            <Link href={user ? '/compte' : '/login'} className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-white/10 transition">
-              {initials ? (
-                <div className="w-7 h-7 rounded-full bg-white/20 border border-white/40 flex items-center justify-center text-white text-[10px] font-black">
-                  {initials}
-                </div>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              )}
-              <span className="text-white/70 text-xs">{user ? (displayName.split(' ')[0] || 'Mon compte') : 'Mon compte'}</span>
-            </Link>
-            <Link href="/panier" className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-white/10 transition">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-              <span className="text-white/70 text-xs">Mon panier</span>
-              {totalItems > 0 && (
-                <span className="absolute top-0.5 right-0.5 bg-[#f5c842] text-gray-900 text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">{totalItems}</span>
-              )}
-            </Link>
+          {/* Ligne 2 : Barre de recherche mobile pleine largeur */}
+          <div className="md:hidden px-3 pb-2">
+            <div className="flex items-center bg-white/15 backdrop-blur-md rounded-xl overflow-hidden border border-white/25 focus-within:bg-white/25 transition">
+              <div className="flex items-center gap-2 flex-1 px-3 py-2.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="opacity-60 shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un produit…" className="flex-1 bg-transparent text-sm text-white placeholder:text-white/50 outline-none" />
+              </div>
+              <button onClick={() => document.getElementById('catalogue')?.scrollIntoView({ behavior: 'smooth' })} className="bg-[#f5c842] text-gray-900 px-4 py-2.5 text-sm font-bold hover:bg-yellow-400 transition shrink-0">
+                Rechercher
+              </button>
+            </div>
           </div>
         </header>
 
