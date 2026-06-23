@@ -24,6 +24,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     { href: '/commandes', label: 'Mes commandes' },
   ]
 
+  const displayName = user?.displayName || user?.email?.split('@')[0] || ''
+  const initials = displayName
+    ? displayName.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
+    : null
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-[#1a5c2a] sticky top-0 z-50 shadow-md">
@@ -37,7 +42,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <span className="text-white font-bold text-lg tracking-tight">Kenzi Market</span>
           </Link>
 
-          {/* Nav links */}
+          {/* Nav links desktop */}
           <nav className="hidden md:flex items-center gap-6">
             {navLinks.map(l => (
               <Link key={l.href} href={l.href}
@@ -63,6 +68,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               )}
             </Link>
 
+            {/* Profil mobile */}
+            <Link href="/compte"
+              className="md:hidden w-10 h-10 rounded-xl border border-white/30 flex items-center justify-center text-white hover:bg-white/10 transition">
+              {initials ? (
+                <span className="text-xs font-black">{initials}</span>
+              ) : (
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+              )}
+            </Link>
+
             {user && (
               <button onClick={handleLogout}
                 className="hidden md:flex items-center gap-1.5 text-white/70 hover:text-white text-sm font-medium transition px-3 py-2 rounded-xl hover:bg-white/10">
@@ -76,7 +93,51 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">{children}</main>
+      <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:pb-8">{children}</main>
+
+      {/* Bottom nav mobile */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 flex items-center">
+        <Link href="/catalogue"
+          className={`flex-1 flex flex-col items-center gap-1 py-3 text-[11px] font-medium transition ${pathname.startsWith('/catalogue') ? 'text-[#1a5c2a]' : 'text-gray-500'}`}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Catalogue
+        </Link>
+
+        <Link href="/commandes"
+          className={`flex-1 flex flex-col items-center gap-1 py-3 text-[11px] font-medium transition ${pathname.startsWith('/commandes') ? 'text-[#1a5c2a]' : 'text-gray-500'}`}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          Commandes
+        </Link>
+
+        <Link href="/panier"
+          className={`flex-1 flex flex-col items-center gap-1 py-3 text-[11px] font-medium transition relative ${pathname === '/panier' ? 'text-[#1a5c2a]' : 'text-gray-500'}`}>
+          <span className="relative">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            {totalItems > 0 && (
+              <span className="absolute -top-1.5 -right-2 bg-[#f5c842] text-gray-900 text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
+                {totalItems}
+              </span>
+            )}
+          </span>
+          Panier
+        </Link>
+
+        <Link href="/compte"
+          className={`flex-1 flex flex-col items-center gap-1 py-3 text-[11px] font-medium transition ${pathname.startsWith('/compte') ? 'text-[#1a5c2a]' : 'text-gray-500'}`}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          Profil
+        </Link>
+      </nav>
     </div>
   )
 }
