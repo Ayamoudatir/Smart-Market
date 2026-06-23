@@ -40,13 +40,21 @@ export default function AiCartInput() {
   const [preview, setPreview] = useState<string | null>(null)
   const [results, setResults] = useState<Result[]>([])
   const [cameraOpen, setCameraOpen] = useState(false)
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const recognitionRef = useRef<{ stop: () => void } | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
   function startVoice() {
-    const SR = window.SpeechRecognition || (window as unknown as { webkitSpeechRecognition: typeof SpeechRecognition }).webkitSpeechRecognition
+    type SRConstructor = new () => {
+      lang: string; continuous: boolean; interimResults: boolean
+      onstart: (() => void) | null; onend: (() => void) | null
+      onerror: (() => void) | null
+      onresult: ((e: { results: { [key: number]: { transcript: string } }[] }) => void) | null
+      start: () => void; stop: () => void
+    }
+    const w = window as unknown as { SpeechRecognition?: SRConstructor; webkitSpeechRecognition?: SRConstructor }
+    const SR = w.SpeechRecognition || w.webkitSpeechRecognition
     if (!SR) { alert('Votre navigateur ne supporte pas la reconnaissance vocale.'); return }
     const r = new SR()
     r.lang = 'fr-FR'
@@ -54,7 +62,7 @@ export default function AiCartInput() {
     r.interimResults = false
     r.onstart = () => setListening(true)
     r.onend = () => setListening(false)
-    r.onresult = (e) => setText(e.results[0][0].transcript)
+    r.onresult = (e) => setText((e.results[0] as { [key: number]: { transcript: string } })[0].transcript)
     r.onerror = () => setListening(false)
     recognitionRef.current = r
     r.start()
